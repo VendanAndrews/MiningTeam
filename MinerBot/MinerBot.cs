@@ -36,6 +36,8 @@ namespace MinerBot
         double CurRoidOre = 0;
         double EstimatedMined = 0;
         bool Active = false;
+        Dictionary<Module, int> Cycles = null;
+        Dictionary<Module, double> CyclePos = null;
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -97,6 +99,19 @@ namespace MinerBot
                             CurState = State.InBelt;
                             break;
                         case State.InBelt:
+                            Func<Module, bool> MiningLasers = (mod) => mod.GroupID == Group.FrequencyMiningLaser || mod.GroupID == Group.MiningLaser || mod.GroupID == Group.StripMiner;
+                            if (Cycles == null)
+                            {
+                                Cycles = new Dictionary<Module, int>();
+                                CyclePos = new Dictionary<Module, double>();
+                                foreach (Module Laser in MyShip.Modules.Where(MiningLasers))
+                                {
+                                    Cycles.Add(Laser, 0);
+                                    CyclePos.Add(Laser, 0);
+                                }
+                            }
+
+
                             if (Entity.All.Count(ent => ent.IsTargetingMe) > 0)
                             {
                                 CurState = State.Defensive;
@@ -129,9 +144,13 @@ namespace MinerBot
                             if (CurRoid == null || !CurRoid.Exists)
                             {
                                 CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid).OrderBy(ent => ent.Distance).First();
+                                foreach (Module Laser in Cycles.Keys.ToList())
+                                {
+                                    Cycles[Laser] = 0;
+                                    CyclePos[Laser] = 0;
+                                }
                             }
-                            Func<Module, bool> MiningLasers = (mod) => mod.GroupID == Group.FrequencyMiningLaser || mod.GroupID == Group.MiningLaser || mod.GroupID == Group.StripMiner;
-
+                            
                             if (CurRoid.Distance > MyShip.Modules.Where(MiningLasers).Min(mod => mod.OptimalRange))
                             {
                                 if(MyShip.ToEntity.Mode == EntityMode.Approaching)
@@ -150,6 +169,19 @@ namespace MinerBot
                                 return;
                             }
 
+                            foreach (Module Laser in MyShip.Modules.Where(MiningLasers))
+                            {
+                                if (Laser.Completion < CyclePos[Laser])
+                                {
+                                    Cycles[Laser]++;
+                                }
+                                CyclePos[Laser] = Laser.Completion;
+                            }
+
+                            EstimatedMined = (double)MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * (mod.Completion+Cycles[mod]));
+
+
+
                             if(MyShip.Modules.Count(mod => mod.GroupID == Group.SurveyScanner) > 0)
                             {
                                 if (!SurveyScan.Scan.ContainsKey(CurRoid) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
@@ -161,9 +193,8 @@ namespace MinerBot
                                 if (SurveyScan.Scan.ContainsKey(CurRoid))
                                 {
                                     CurRoidOre = SurveyScan.Scan[CurRoid] * CurRoid.Volume;
-                                    EstimatedMined = (double)MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * mod.TotalCompletion);
 
-                                    if (MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * mod.TotalCompletion) > (SurveyScan.Scan[CurRoid] * CurRoid.Volume + 5))
+                                    if (EstimatedMined > (SurveyScan.Scan[CurRoid] * CurRoid.Volume + 5))
                                     {
                                         EVEFrame.Log("ShortCycling Lasers");
                                         foreach (Module laser in MyShip.Modules.Where(MiningLasers))
