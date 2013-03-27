@@ -2,3 +2,5 @@ obj
 Debug
 *.suo
 *.vshost.exe
+*.manifest
+*.config
