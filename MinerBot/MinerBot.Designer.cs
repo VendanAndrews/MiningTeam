@@ -37,6 +37,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.lblCurRoidOre = new System.Windows.Forms.Label();
             this.lblEstimatedMined = new System.Windows.Forms.Label();
+            this.lblDroneState = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblState
@@ -109,11 +110,21 @@
             this.lblEstimatedMined.TabIndex = 6;
             this.lblEstimatedMined.Text = "Estimated Mined: ";
             // 
+            // lblDroneState
+            // 
+            this.lblDroneState.AutoSize = true;
+            this.lblDroneState.Location = new System.Drawing.Point(12, 31);
+            this.lblDroneState.Name = "lblDroneState";
+            this.lblDroneState.Size = new System.Drawing.Size(47, 13);
+            this.lblDroneState.TabIndex = 7;
+            this.lblDroneState.Text = "Drones: ";
+            // 
             // MinerBot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(288, 206);
+            this.Controls.Add(this.lblDroneState);
             this.Controls.Add(this.lblEstimatedMined);
             this.Controls.Add(this.lblCurRoidOre);
             this.Controls.Add(this.btnCurrentStation);
@@ -139,6 +150,7 @@
         private System.Windows.Forms.Timer timer1;
         private System.Windows.Forms.Label lblCurRoidOre;
         private System.Windows.Forms.Label lblEstimatedMined;
+        private System.Windows.Forms.Label lblDroneState;
 
     }
 }
