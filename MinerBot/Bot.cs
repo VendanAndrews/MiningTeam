@@ -116,7 +116,7 @@ namespace MinerBot
                 MyShip.OreHold.MakeActive();
                 return false;
             }
-            if (MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity * 0.75)
+            if (MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity * 0.95)
             {
                 EVEFrame.Log("Preparing to Unload");
                 QueueState(PrepareUnload);
@@ -193,6 +193,15 @@ namespace MinerBot
                             Cycles[laser] = 0;
                         }
                     }
+                }
+            }
+
+            if ((double)MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * mod.Completion) + MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity)
+            {
+                foreach (Module laser in MyShip.Modules.Where(MiningLasers))
+                {
+                    laser.Deactivate();
+                    Cycles[laser] = 0;
                 }
             }
 
