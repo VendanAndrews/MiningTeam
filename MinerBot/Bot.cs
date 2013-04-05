@@ -17,6 +17,20 @@ namespace MinerBot
         public bool Active = false;
         Dictionary<Module, int> Cycles = null;
         Dictionary<Module, double> CyclePos = null;
+        Dictionary<Module, Entity> CycleTarget = null;
+
+        bool Rescan = false;
+
+        public DroneDefense drones = new DroneDefense();
+
+        public DropoffType Dropoff = DropoffType.ItemHangar;
+
+        public enum DropoffType
+        {
+            ItemHangar,
+            CorpHangar,
+            Jetcan
+        }
 
         public bool InStation(object[] Params)
         {
@@ -53,8 +67,9 @@ namespace MinerBot
             {
                 EVEFrame.Log("Undocking");
                 Command.CmdExitStation.Execute();
-                NextPulse = DateTime.Now.AddSeconds(10);
-                return false;
+                WaitFor(30, () => Session.InSpace);
+                QueueState(Unloaded);
+                return true;
             }
             QueueState(InBelt);
             return true;
@@ -67,26 +82,28 @@ namespace MinerBot
             {
                 Cycles = new Dictionary<Module, int>();
                 CyclePos = new Dictionary<Module, double>();
+                CycleTarget = new Dictionary<Module, Entity>();
                 foreach (Module Laser in MyShip.Modules.Where(MiningLasers))
                 {
                     Cycles.Add(Laser, 0);
                     CyclePos.Add(Laser, 0);
+                    CycleTarget.Add(Laser, null);
                 }
-            }
-
-            if (Entity.All.Count(ent => ent.IsTargetingMe) > 0)
-            {
-                QueueState(Defensive);
-                QueueState(InBelt);
-                return true;
             }
 
             if (Entity.All.Count(ent => ent.CategoryID == Category.Asteroid) == 0)
             {
                 CurBelt = null;
+                QueueState(PrepareToWarp);
                 QueueState(HeadingToBelt);
                 return true;
             }
+
+            if (!drones.Active)
+            {
+                drones.Activate();
+            }
+
             if (MyShip.OreHold == null)
             {
                 EVEFrame.Log("Opening Inventory");
@@ -101,8 +118,8 @@ namespace MinerBot
             }
             if (MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity * 0.75)
             {
-                EVEFrame.Log("Returning To Station");
-                QueueState(ReturningToStation);
+                EVEFrame.Log("Preparing to Unload");
+                QueueState(PrepareUnload);
                 return true;
             }
             if (CurRoid == null || !CurRoid.Exists)
@@ -113,6 +130,7 @@ namespace MinerBot
                     Cycles[Laser] = 0;
                     CyclePos[Laser] = 0;
                 }
+                Rescan = false;
             }
 
             if (CurRoid.Distance > MyShip.Modules.Where(MiningLasers).Min(mod => mod.OptimalRange))
@@ -140,18 +158,25 @@ namespace MinerBot
                     Cycles[Laser]++;
                 }
                 CyclePos[Laser] = Laser.Completion;
+                if (Laser.IsActive)
+                {
+                    if (CycleTarget[Laser] == null || !CycleTarget[Laser].ActiveModules.Contains(Laser))
+                    {
+                        Cycles[Laser] = 0;
+                        CycleTarget[Laser] = Entity.Targets.FirstOrDefault(ent => ent.ActiveModules.Contains(Laser));
+                    }
+                }
             }
 
             EstimatedMined = (double)MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * (mod.Completion + Cycles[mod]));
 
-
-
             if (MyShip.Modules.Count(mod => mod.GroupID == Group.SurveyScanner) > 0)
             {
-                if (!SurveyScan.Scan.ContainsKey(CurRoid) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
+                if ((!SurveyScan.Scan.ContainsKey(CurRoid) || Rescan) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
                 {
                     EVEFrame.Log("Activating Scanner");
                     MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).Activate();
+                    Rescan = false;
                     return false;
                 }
                 if (SurveyScan.Scan.ContainsKey(CurRoid))
@@ -161,9 +186,11 @@ namespace MinerBot
                     if (EstimatedMined > (SurveyScan.Scan[CurRoid] * CurRoid.Volume + 5))
                     {
                         EVEFrame.Log("ShortCycling Lasers");
+                        Rescan = true;
                         foreach (Module laser in MyShip.Modules.Where(MiningLasers))
                         {
                             laser.Deactivate();
+                            Cycles[laser] = 0;
                         }
                     }
                 }
@@ -173,17 +200,59 @@ namespace MinerBot
             {
                 EVEFrame.Log("Mining " + CurRoid.Name);
                 MyShip.Modules.Where(MiningLasers).First(mod => !mod.IsActive).Activate(CurRoid);
+                return false;
+            }
+
+            foreach(Module laser in MyShip.Modules.Where(MiningLasers).Where(mod => mod.IsActive && !CurRoid.ActiveModules.Contains(mod)))
+            {
+                laser.Deactivate();
+                CyclePos[laser] = 0;
+                Cycles[laser] = 0;
+                return false;
             }
             return false;
         }
 
+        public bool PrepareUnload(object[] Params)
+        {
+            switch (Dropoff)
+            {
+                case DropoffType.ItemHangar:
+                    QueueState(PrepareToWarp);
+                    QueueState(DockAtStation);
+                    QueueState(InStation);
+
+                    break;
+            }
+            return true;
+        }
+
+        public bool PrepareToWarp(object[] Params)
+        {
+            if (drones.Active)
+            {
+                drones.Deactivate();
+            }
+            return !drones.Busy;
+        }
+
         public bool HeadingToBelt(object[] Params)
         {
+            if (Session.InStation)
+            {
+                QueueState(InStation);
+                return true;
+            }
             if (CurBelt == null || !CurBelt.Exists)
             {
                 if (Belts.Count == 0)
                 {
                     Belts = new Queue<Entity>(Entity.All.Where(ent => ent.GroupID == Group.AsteroidBelt));
+                    if (Belts.Count == 0)
+                    {
+                        EVEFrame.Log("Error, no belts found");
+                        return true;
+                    }
                 }
                 CurBelt = Belts.Dequeue();
                 return false;
@@ -192,8 +261,9 @@ namespace MinerBot
             {
                 EVEFrame.Log("Warping To " + CurBelt.Name);
                 CurBelt.WarpTo();
-                NextPulse = DateTime.Now.AddSeconds(10);
-                return false;
+                WaitFor(10, () => false, () => MyShip.ToEntity.Mode == EntityMode.Warping);
+                QueueState(HeadingToBelt);
+                return true;
             }
             if (CurBelt.Distance < 100000)
             {
@@ -203,7 +273,7 @@ namespace MinerBot
             return false;
         }
 
-        public bool ReturningToStation(object[] Params)
+        public bool DockAtStation(object[] Params)
         {
             if (Session.InStation)
             {
@@ -220,47 +290,6 @@ namespace MinerBot
                     NextPulse = DateTime.Now.AddSeconds(10);
                     return false;
                 }
-            }
-            return false;
-        }
-
-        public bool Defensive(object[] Params)
-        {
-            if (Entity.All.Count(ent => ent.IsTargetingMe) == 0)
-            {
-                Drone.AllInSpace.Where(drone => drone.State != EntityState.Departing && drone.State != EntityState.Departing_2).ReturnToDroneBay();
-                if (Drone.AllInSpace.Count() > 0)
-                {
-                    return false;
-                }
-                return true;
-            }
-            if (CurTarget == null || CurTarget.Exploded)
-            {
-                CurTarget = Entity.All.First(ent => ent.IsTargetingMe);
-                return false;
-            }
-            if (CurTarget.Distance < MyShip.MaxTargetRange)
-            {
-                CurTarget.LockTarget();
-                return false;
-            }
-            if (!CurTarget.IsActiveTarget && CurTarget.LockedTarget)
-            {
-                CurTarget.MakeActive();
-                return false;
-            }
-            if (CurTarget.Distance < 20000 && CurTarget.IsActiveTarget && Drone.AllInSpace.Count(drone => drone.GroupID == Group.CombatDrone && drone.Target != CurTarget) > 0)
-            {
-                Drone.AllInSpace.Where(drone => drone.GroupID == Group.CombatDrone && drone.Target != CurTarget).Attack();
-                NextPulse = DateTime.Now.AddSeconds(5);
-                return false;
-            }
-            if (Drone.AllInBay.Count(drone => drone.GroupID == Group.CombatDrone) > 0 && Me.MaxActiveDrones > Drone.AllInSpace.Count())
-            {
-                Drone.AllInBay.Where(drone => drone.GroupID == Group.CombatDrone).Take(Me.MaxActiveDrones - Drone.AllInSpace.Count()).Launch();
-                NextPulse = DateTime.Now.AddSeconds(5);
-                return false;
             }
             return false;
         }

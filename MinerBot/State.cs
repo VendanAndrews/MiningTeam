@@ -19,6 +19,10 @@ namespace MinerBot
                 this.Params = Params;
                 this.Frequency = Frequency;
             }
+            public override string ToString()
+            {
+                return State.Method.Name;
+            }
         }
 
         public int DefaultFrequency { get; set; }

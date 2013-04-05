@@ -38,7 +38,7 @@ namespace MinerBot
         {
             if (chkActive.Checked)
             {
-                bot.QueueState(bot.InBelt);
+                bot.QueueState(bot.InStation);
             }
             else
             {
@@ -58,16 +58,27 @@ namespace MinerBot
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (bot.CurState != null)
+            if (bot != null)
             {
-                lblState.Text = "State: " + bot.CurState.ToString();
+                if (bot.CurState != null)
+                {
+                    lblState.Text = "State: " + bot.CurState.ToString();
+                }
+                else
+                {
+                    lblState.Text = "State: Idle";
+                }
+                if (bot.drones.CurState != null)
+                {
+                    lblDroneState.Text = "Drones: " + bot.drones.CurState.ToString();
+                }
+                else
+                {
+                    lblDroneState.Text = "Drones: Idle";
+                }
+                lblCurRoidOre.Text = "CurRoid Ore: " + bot.CurRoidOre.ToString("F2") + " m^3";
+                lblEstimatedMined.Text = "EstimatedMined: " + bot.EstimatedMined.ToString("F2") + " m^3";
             }
-            else
-            {
-                lblState.Text = "State: Idle";
-            }
-            lblCurRoidOre.Text = "CurRoid Ore: " + bot.CurRoidOre.ToString("F2") + " m^3";
-            lblEstimatedMined.Text = "EstimatedMined: " + bot.EstimatedMined.ToString("F2") + " m^3";
         }
     }
 }
