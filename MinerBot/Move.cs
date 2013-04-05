@@ -8,6 +8,8 @@ namespace MinerBot
 {
     class Move : State
     {
+        public bool Busy = false;
+
         public Move()
         {
             DefaultFrequency = 1000;
@@ -15,9 +17,8 @@ namespace MinerBot
 
         public void DockAt(Func<IDockable> Dockable)
         {
-
-
-
+            QueueState(DockAtState, -1, Dockable);
+            Busy = true;
         }
 
         public void DockAt(IDockable Dockable)

@@ -12,16 +12,6 @@ namespace MinerBot
         public bool Busy = false;
         public bool Active = false;
 
-        public DropoffType Dropoff = DropoffType.ItemHangar;
-
-        public enum DropoffType
-        {
-            ItemHangar,
-            CorpHangar,
-            Jetcan
-        }
-
-
         public DroneDefense()
         {
             DefaultFrequency = 5000;
@@ -44,7 +34,7 @@ namespace MinerBot
                 CurTarget = Entity.All.First(ent => ent.IsTargetingMe);
                 return false;
             }
-            if (CurTarget.Distance < MyShip.MaxTargetRange)
+            if (CurTarget.Distance < MyShip.MaxTargetRange && !CurTarget.LockedTarget && !CurTarget.LockingTarget)
             {
                 CurTarget.LockTarget();
                 return false;
@@ -56,7 +46,9 @@ namespace MinerBot
             }
             if (CurTarget.Distance < 20000 && CurTarget.IsActiveTarget && Drone.AllInSpace.Count(drone => drone.GroupID == Group.CombatDrone && drone.Target != CurTarget) > 0)
             {
-                Drone.AllInSpace.Where(drone => drone.GroupID == Group.CombatDrone && drone.Target != CurTarget).Attack();
+                List<Drone> drones = Drone.AllInSpace.Where(drone => drone.GroupID == Group.CombatDrone && drone.Target != CurTarget).ToList();
+                EVEFrame.Log("Attacking with " + drones.Count);
+                drones.Attack();
                 return false;
             }
             if (Drone.AllInBay.Count(drone => drone.GroupID == Group.CombatDrone) > 0 && Me.MaxActiveDrones > Drone.AllInSpace.Count())

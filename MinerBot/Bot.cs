@@ -17,6 +17,9 @@ namespace MinerBot
         public bool Active = false;
         Dictionary<Module, int> Cycles = null;
         Dictionary<Module, double> CyclePos = null;
+        Dictionary<Module, Entity> CycleTarget = null;
+
+        bool Rescan = false;
 
         public DroneDefense drones = new DroneDefense();
 
@@ -79,10 +82,12 @@ namespace MinerBot
             {
                 Cycles = new Dictionary<Module, int>();
                 CyclePos = new Dictionary<Module, double>();
+                CycleTarget = new Dictionary<Module, Entity>();
                 foreach (Module Laser in MyShip.Modules.Where(MiningLasers))
                 {
                     Cycles.Add(Laser, 0);
                     CyclePos.Add(Laser, 0);
+                    CycleTarget.Add(Laser, null);
                 }
             }
 
@@ -125,6 +130,7 @@ namespace MinerBot
                     Cycles[Laser] = 0;
                     CyclePos[Laser] = 0;
                 }
+                Rescan = false;
             }
 
             if (CurRoid.Distance > MyShip.Modules.Where(MiningLasers).Min(mod => mod.OptimalRange))
@@ -152,16 +158,25 @@ namespace MinerBot
                     Cycles[Laser]++;
                 }
                 CyclePos[Laser] = Laser.Completion;
+                if (Laser.IsActive)
+                {
+                    if (CycleTarget[Laser] == null || !CycleTarget[Laser].ActiveModules.Contains(Laser))
+                    {
+                        Cycles[Laser] = 0;
+                        CycleTarget[Laser] = Entity.Targets.FirstOrDefault(ent => ent.ActiveModules.Contains(Laser));
+                    }
+                }
             }
 
             EstimatedMined = (double)MyShip.Modules.Where(MiningLasers).Sum(mod => mod.MiningYield * (mod.Completion + Cycles[mod]));
 
             if (MyShip.Modules.Count(mod => mod.GroupID == Group.SurveyScanner) > 0)
             {
-                if (!SurveyScan.Scan.ContainsKey(CurRoid) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
+                if ((!SurveyScan.Scan.ContainsKey(CurRoid) || Rescan) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
                 {
                     EVEFrame.Log("Activating Scanner");
                     MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).Activate();
+                    Rescan = false;
                     return false;
                 }
                 if (SurveyScan.Scan.ContainsKey(CurRoid))
@@ -171,9 +186,11 @@ namespace MinerBot
                     if (EstimatedMined > (SurveyScan.Scan[CurRoid] * CurRoid.Volume + 5))
                     {
                         EVEFrame.Log("ShortCycling Lasers");
+                        Rescan = true;
                         foreach (Module laser in MyShip.Modules.Where(MiningLasers))
                         {
                             laser.Deactivate();
+                            Cycles[laser] = 0;
                         }
                     }
                 }
@@ -221,11 +238,21 @@ namespace MinerBot
 
         public bool HeadingToBelt(object[] Params)
         {
+            if (Session.InStation)
+            {
+                QueueState(InStation);
+                return true;
+            }
             if (CurBelt == null || !CurBelt.Exists)
             {
                 if (Belts.Count == 0)
                 {
                     Belts = new Queue<Entity>(Entity.All.Where(ent => ent.GroupID == Group.AsteroidBelt));
+                    if (Belts.Count == 0)
+                    {
+                        EVEFrame.Log("Error, no belts found");
+                        return true;
+                    }
                 }
                 CurBelt = Belts.Dequeue();
                 return false;
