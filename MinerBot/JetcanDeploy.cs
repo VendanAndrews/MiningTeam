@@ -44,6 +44,10 @@ namespace MinerBot
                     return false;
                 }
             }
+            else
+            {
+                CurJetcan = Jetcans.FirstOrDefault(can => can.CanCargo != null && can.CanCargo.IsPrimed && can.CanCargo.UsedCapacity < CurJetcan.CanCargo.MaxCapacity * 0.95);
+            }
             if (CurJetcan == null && MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity * 0.5 && (DateTime.Now - LastDrop).TotalMinutes > 3)
             {
                 MyShip.OreHold.Items.Where(item => item.CategoryID == Category.Asteroid).Jettison();
