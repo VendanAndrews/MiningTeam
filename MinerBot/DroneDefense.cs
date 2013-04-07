@@ -9,8 +9,7 @@ namespace MinerBot
     class DroneDefense : State
     {
         public Entity CurTarget;
-        public bool Busy = false;
-        public bool Active = false;
+        public bool InCombat = false;
 
         public DroneDefense()
         {
@@ -26,7 +25,7 @@ namespace MinerBot
                 {
                     return false;
                 }
-                Busy = false;
+                InCombat = false;
                 return true;
             }
             if (CurTarget == null || CurTarget.Exploded)
@@ -65,7 +64,7 @@ namespace MinerBot
             {
                 QueueState(Combat);
                 QueueState(WaitForTarget);
-                Busy = true;
+                InCombat = true;
                 return true;
             }
             return false;
@@ -73,22 +72,17 @@ namespace MinerBot
 
         public void Activate()
         {
-            if (!Active)
+            if (Idle)
             {
                 QueueState(WaitForTarget);
-                Active = true;
             }
         }
 
         public void Deactivate()
         {
-            if (Active)
+            if (!InCombat)
             {
                 Clear();
-                if (Busy)
-                {
-                    QueueState(Combat);
-                }
             }
         }
     }

@@ -76,8 +76,33 @@ namespace MinerBot
                 {
                     lblDroneState.Text = "Drones: Idle";
                 }
+                if (bot.jetcans.CurState != null)
+                {
+                    lblJetcanState.Text = "Jetcans: " + bot.jetcans.CurState.ToString();
+                }
+                else
+                {
+                    lblJetcanState.Text = "Jetcans: Idle";
+                }
                 lblCurRoidOre.Text = "CurRoid Ore: " + bot.CurRoidOre.ToString("F2") + " m^3";
                 lblEstimatedMined.Text = "EstimatedMined: " + bot.EstimatedMined.ToString("F2") + " m^3";
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (comboBox1.SelectedItem != null)
+            {
+                switch (comboBox1.SelectedItem.ToString())
+                {
+                    case "ItemHangar":
+                        bot.Dropoff = Bot.DropoffType.ItemHangar;
+                        break;
+                    case "Jetcan":
+                        bot.Dropoff = Bot.DropoffType.Jetcan;
+                        break;
+
+                }
             }
         }
     }

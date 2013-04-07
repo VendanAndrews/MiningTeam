@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="Bot.cs" />
     <Compile Include="DroneDefense.cs" />
+    <Compile Include="JetcanDeploy.cs" />
     <Compile Include="MinerBot.cs">
       <SubType>Form</SubType>
     </Compile>
