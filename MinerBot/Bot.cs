@@ -22,6 +22,7 @@ namespace MinerBot
         bool Rescan = false;
 
         public DroneDefense drones = new DroneDefense();
+        public JetcanDeploy jetcans = new JetcanDeploy();
 
         public DropoffType Dropoff = DropoffType.ItemHangar;
 
@@ -99,7 +100,16 @@ namespace MinerBot
                 return true;
             }
 
-            if (!drones.Active)
+            if (Dropoff == DropoffType.Jetcan && jetcans.Idle)
+            {
+                jetcans.QueueState(jetcans.JetCan);
+            }
+            if (Dropoff != DropoffType.Jetcan && !jetcans.Idle)
+            {
+                jetcans.Clear();
+            }
+
+            if (drones.Idle)
             {
                 drones.Activate();
             }
@@ -230,7 +240,9 @@ namespace MinerBot
                     QueueState(PrepareToWarp);
                     QueueState(DockAtStation);
                     QueueState(InStation);
-
+                    break;
+                case DropoffType.Jetcan:
+                    QueueState(InBelt);
                     break;
             }
             return true;
@@ -238,11 +250,15 @@ namespace MinerBot
 
         public bool PrepareToWarp(object[] Params)
         {
-            if (drones.Active)
+            if (drones.InCombat && !drones.Idle)
             {
                 drones.Deactivate();
             }
-            return !drones.Busy;
+            if (!jetcans.Idle)
+            {
+                jetcans.Clear();
+            }
+            return drones.Idle;
         }
 
         public bool HeadingToBelt(object[] Params)

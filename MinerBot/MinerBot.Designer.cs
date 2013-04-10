@@ -38,6 +38,8 @@
             this.lblCurRoidOre = new System.Windows.Forms.Label();
             this.lblEstimatedMined = new System.Windows.Forms.Label();
             this.lblDroneState = new System.Windows.Forms.Label();
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.lblJetcanState = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // lblState
@@ -119,11 +121,34 @@
             this.lblDroneState.TabIndex = 7;
             this.lblDroneState.Text = "Drones: ";
             // 
+            // comboBox1
+            // 
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Items.AddRange(new object[] {
+            "ItemHangar",
+            "Jetcan"});
+            this.comboBox1.Location = new System.Drawing.Point(143, 112);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 8;
+            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            // 
+            // lblJetcanState
+            // 
+            this.lblJetcanState.AutoSize = true;
+            this.lblJetcanState.Location = new System.Drawing.Point(140, 9);
+            this.lblJetcanState.Name = "lblJetcanState";
+            this.lblJetcanState.Size = new System.Drawing.Size(64, 13);
+            this.lblJetcanState.TabIndex = 9;
+            this.lblJetcanState.Text = "JetcanState";
+            // 
             // MinerBot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(288, 206);
+            this.Controls.Add(this.lblJetcanState);
+            this.Controls.Add(this.comboBox1);
             this.Controls.Add(this.lblDroneState);
             this.Controls.Add(this.lblEstimatedMined);
             this.Controls.Add(this.lblCurRoidOre);
@@ -151,6 +176,8 @@
         private System.Windows.Forms.Label lblCurRoidOre;
         private System.Windows.Forms.Label lblEstimatedMined;
         private System.Windows.Forms.Label lblDroneState;
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.Label lblJetcanState;
 
     }
 }
