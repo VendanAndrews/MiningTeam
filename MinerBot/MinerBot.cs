@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using EveCom;
+using EveComFramework.Core;
+using EveComFramework.Move;
 
 namespace MinerBot
 {

@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using EveCom;
+using EveComFramework.Core;
+using EveComFramework.Move;
 
 namespace MinerBot
 {
