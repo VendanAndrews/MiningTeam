@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -60,6 +60,7 @@ namespace MinerBot
                 MyShip.OreHold.Items.Where(item => item.CategoryID == Category.Asteroid).MoveTo(Station.ItemHangar);
                 return false;
             }
+            
             QueueState(Unloaded);
             return true;
         }
@@ -241,7 +242,6 @@ namespace MinerBot
                 case DropoffType.ItemHangar:
                     QueueState(PrepareToWarp);
                     QueueState(DockAtStation);
-                    QueueState(InStation);
                     break;
                 case DropoffType.Jetcan:
                     QueueState(InBelt);
@@ -255,12 +255,14 @@ namespace MinerBot
             if (drones.InCombat && !drones.Idle)
             {
                 drones.Deactivate();
+                return drones.Idle;           // Not sure About this one !
             }
             if (!jetcans.Idle)
             {
                 jetcans.Clear();
             }
-            return drones.Idle;
+            
+            return true;
         }
 
         public bool HeadingToBelt(object[] Params)
@@ -312,7 +314,7 @@ namespace MinerBot
                 Entity station = Entity.All.FirstOrDefault(ent => ent.GroupID == Group.Station && ent.Name == Properties.Settings.Default.Station);
                 if (station != null && station.Exists)
                 {
-                    EVEFrame.Log("Docking At " + CurRoid.Name);
+                    EVEFrame.Log("Docking...");
                     station.Dock();
                     NextPulse = DateTime.Now.AddSeconds(10);
                     return false;
