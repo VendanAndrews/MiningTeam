@@ -60,7 +60,6 @@ namespace MinerBot
                 MyShip.OreHold.Items.Where(item => item.CategoryID == Category.Asteroid).MoveTo(Station.ItemHangar);
                 return false;
             }
-            
             QueueState(Unloaded);
             return true;
         }
@@ -261,7 +260,6 @@ namespace MinerBot
             {
                 jetcans.Clear();
             }
-            
             return true;
         }
 
