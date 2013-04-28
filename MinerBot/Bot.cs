@@ -56,8 +56,8 @@ namespace MinerBot
         {
             try
             {
-                EVEFrame.Log("Adding roid " + args[3] + " to used list for miner " + args[2]);
-                UsedRoidList.AddOrUpdate(long.Parse(args[2]), long.Parse(args[3]));
+                EVEFrame.Log("Adding roid " + args[2] + " to used list for miner " + args[1]);
+                UsedRoidList.AddOrUpdate(long.Parse(args[1]), long.Parse(args[2]));
             }
             catch { }
 
