@@ -139,7 +139,7 @@ namespace MinerBot
                 }
             }
 
-            if (Entity.All.Count(ent => ent.CategoryID == Category.Asteroid) == 0)
+            if (Entity.All.Count(ent => ent.CategoryID == Category.Asteroid && !UsedRoidList.ContainsValue(ent.ID)) == 0)
             {
                 CurBelt = null;
                 QueueState(PrepareToWarp);
