@@ -5,11 +5,14 @@ using System.Text;
 using EveCom;
 using EveComFramework.Core;
 using EveComFramework.Move;
+using InnerSpaceAPI;
 
 namespace MinerBot
 {
     class Bot : State
     {
+        
+
         public Queue<Entity> Belts = new Queue<Entity>();
         public Entity CurBelt = null;
         public Entity CurRoid = null;
@@ -20,6 +23,7 @@ namespace MinerBot
         Dictionary<Module, int> Cycles = null;
         Dictionary<Module, double> CyclePos = null;
         Dictionary<Module, Entity> CycleTarget = null;
+        List<long> UsedRoidList = new List<long>();
 
         bool Rescan = false;
 
@@ -46,6 +50,28 @@ namespace MinerBot
                 return false;
             }
             return true;
+        }
+
+        public int UsedRoidListUpdate(string[] args)
+        {
+            try
+            {
+                if (args.Length >= 2)
+                {
+                    foreach (string s in args.Skip(2))
+                    {
+                        UsedRoidList.Add(long.Parse(s));
+                    }
+                }
+            }
+            catch { }
+
+            return 0;
+        }
+
+        public void RegisterCommands()
+        {
+            LavishScriptAPI.LavishScript.Commands.AddCommand("MiningTeamUpdateRoidList", UsedRoidListUpdate);
         }
 
         public bool InStation(object[] Params)
@@ -86,7 +112,7 @@ namespace MinerBot
                     Station.ItemHangar.MakeActive();
                     return false;
                 }
-                if (Station.ItemHangar.Items.GroupBy(a => a.Type).Any(b => b.Count() > 1))
+                if (Station.ItemHangar.Items.Where(a => !a.isUnpacked).GroupBy(a => a.Type).Any(a => a.Count() > 1))
                 {
                     Station.ItemHangar.StackAll();
                     return false;
@@ -159,7 +185,7 @@ namespace MinerBot
                 return true;
             }
 
-            if (MyShip.OreHold.Items.GroupBy(a => a.Type).Any(b => b.Count() > 1))
+            if (MyShip.OreHold.Items.Where(a => !a.isUnpacked).GroupBy(a => a.Type).Any(a => a.Count() > 1))
             {
                 MyShip.OreHold.StackAll();
                 return false;
@@ -167,12 +193,14 @@ namespace MinerBot
 
             if (CurRoid == null || !CurRoid.Exists)
             {
-                CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid).OrderBy(ent => ent.Distance).First();
+                CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid && !UsedRoidList.Contains(ent.ID)).OrderBy(ent => ent.Distance).First();
                 foreach (Module Laser in Cycles.Keys.ToList())
                 {
                     Cycles[Laser] = 0;
                     CyclePos[Laser] = 0;
                 }
+                LavishScriptAPI.LavishScript.ExecuteCommand("relay \"all other\" -noredirect MiningTeamUpdateRoidList " + CurRoid.ID.ToString());
+
                 Rescan = false;
             }
 
@@ -308,7 +336,7 @@ namespace MinerBot
             {
                 if (Belts.Count == 0)
                 {
-                    Belts = new Queue<Entity>(Entity.All.Where(ent => ent.GroupID == Group.AsteroidBelt));
+                    Belts = new Queue<Entity>(Entity.All.Where(ent => ent.GroupID == Group.AsteroidBelt && ent.Type != "Ice Field"));
                     if (Belts.Count == 0)
                     {
                         EVEFrame.Log("Error, no belts found");
@@ -320,7 +348,7 @@ namespace MinerBot
             }
             if (MyShip.ToEntity.Mode != EntityMode.Warping && CurBelt.Distance > 100000)
             {
-                EVEFrame.Log("Warping To " + CurBelt.Name);
+                EVEFrame.Log("Warping To " + CurBelt.Name + " | " + CurBelt.Type);
                 CurBelt.WarpTo();
                 WaitFor(10, () => false, () => MyShip.ToEntity.Mode == EntityMode.Warping);
                 QueueState(HeadingToBelt);

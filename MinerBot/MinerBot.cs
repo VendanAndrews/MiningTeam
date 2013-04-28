@@ -27,6 +27,7 @@ namespace MinerBot
             {
             }
             bot = new Bot();
+            bot.RegisterCommands();
             txtStation.Text = Properties.Settings.Default.Station;
         }
 
