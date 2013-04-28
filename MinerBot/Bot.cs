@@ -35,6 +35,19 @@ namespace MinerBot
             Jetcan
         }
 
+        public bool TemporaryIsPrimedCheck(InventoryContainer Cont)
+        {
+            try
+            {
+                double test = Cont.UsedCapacity;
+            }
+            catch
+            {
+                return false;
+            }
+            return true;
+        }
+
         public bool InStation(object[] Params)
         {
             if (Session.InSpace)
@@ -48,7 +61,7 @@ namespace MinerBot
                 Command.OpenInventory.Execute();
                 return false;
             }
-            if (!MyShip.OreHold.IsPrimed)
+            if (!TemporaryIsPrimedCheck(MyShip.OreHold))
             {
                 EVEFrame.Log("Making OreHold Active");
                 MyShip.OreHold.MakeActive();
@@ -122,7 +135,7 @@ namespace MinerBot
                 Command.OpenInventory.Execute();
                 return false;
             }
-            if (!MyShip.OreHold.IsPrimed)
+            if (!TemporaryIsPrimedCheck(MyShip.OreHold))
             {
                 EVEFrame.Log("Making OreHold Active");
                 MyShip.OreHold.MakeActive();
@@ -241,7 +254,6 @@ namespace MinerBot
                 case DropoffType.ItemHangar:
                     QueueState(PrepareToWarp);
                     QueueState(DockAtStation);
-                    QueueState(InStation);
                     break;
                 case DropoffType.Jetcan:
                     QueueState(InBelt);
@@ -259,6 +271,10 @@ namespace MinerBot
             if (!jetcans.Idle)
             {
                 jetcans.Clear();
+            }
+            if (!drones.Idle)
+            {
+                EVEFrame.Log("drones is not idle.");
             }
             return drones.Idle;
         }
@@ -312,7 +328,7 @@ namespace MinerBot
                 Entity station = Entity.All.FirstOrDefault(ent => ent.GroupID == Group.Station && ent.Name == Properties.Settings.Default.Station);
                 if (station != null && station.Exists)
                 {
-                    EVEFrame.Log("Docking At " + CurRoid.Name);
+                    EVEFrame.Log("Docking At " + station.Name);
                     station.Dock();
                     NextPulse = DateTime.Now.AddSeconds(10);
                     return false;
