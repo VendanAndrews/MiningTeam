@@ -81,6 +81,17 @@ namespace MinerBot
         {
             if (Session.InStation)
             {
+                if (!TemporaryIsPrimedCheck(Station.ItemHangar))
+                {
+                    Station.ItemHangar.MakeActive();
+                    return false;
+                }
+                if (Station.ItemHangar.Items.GroupBy(a => a.Type).Any(b => b.Count() > 1))
+                {
+                    Station.ItemHangar.StackAll();
+                    return false;
+                }
+                
                 EVEFrame.Log("Undocking");
                 Command.CmdExitStation.Execute();
                 WaitFor(30, () => Session.InSpace);
@@ -147,6 +158,13 @@ namespace MinerBot
                 QueueState(PrepareUnload);
                 return true;
             }
+
+            if (MyShip.OreHold.Items.GroupBy(a => a.Type).Any(b => b.Count() > 1))
+            {
+                MyShip.OreHold.StackAll();
+                return false;
+            }
+
             if (CurRoid == null || !CurRoid.Exists)
             {
                 CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid).OrderBy(ent => ent.Distance).First();
