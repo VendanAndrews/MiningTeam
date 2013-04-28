@@ -194,7 +194,10 @@ namespace MinerBot
                     Cycles[Laser] = 0;
                     CyclePos[Laser] = 0;
                 }
-                LavishScriptAPI.LavishScript.ExecuteCommand("relay \"all other\" -noredirect MiningTeamUpdateRoidList " + Me.CharID + " " + CurRoid.ID.ToString());
+                if (CurRoid != null)
+                {
+                    LavishScriptAPI.LavishScript.ExecuteCommand("relay \"all other\" -noredirect MiningTeamUpdateRoidList " + Me.CharID + " " + CurRoid.ID.ToString());
+                }
 
                 Rescan = false;
             }
