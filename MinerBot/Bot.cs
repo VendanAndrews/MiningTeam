@@ -23,7 +23,7 @@ namespace MinerBot
         Dictionary<Module, int> Cycles = null;
         Dictionary<Module, double> CyclePos = null;
         Dictionary<Module, Entity> CycleTarget = null;
-        List<long> UsedRoidList = new List<long>();
+        Dictionary<long, long> UsedRoidList = new Dictionary<long,long>();
 
         bool Rescan = false;
 
@@ -56,14 +56,8 @@ namespace MinerBot
         {
             try
             {
-                if (args.Length >= 2)
-                {
-                    foreach (string s in args.Skip(1))
-                    {
-                        EVEFrame.Log("Adding roid " + s + " to used list");
-                        UsedRoidList.Add(long.Parse(s));
-                    }
-                }
+                EVEFrame.Log("Adding roid " + args[3] + " to used list for miner " + args[2]);
+                UsedRoidList.AddOrUpdate(long.Parse(args[2]), long.Parse(args[3]));
             }
             catch { }
 
@@ -194,13 +188,13 @@ namespace MinerBot
 
             if (CurRoid == null || !CurRoid.Exists)
             {
-                CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid && !UsedRoidList.Contains(ent.ID)).OrderBy(ent => ent.Distance).First();
+                CurRoid = Entity.All.Where(ent => ent.CategoryID == Category.Asteroid && !UsedRoidList.ContainsValue(ent.ID)).OrderBy(ent => ent.Distance).First();
                 foreach (Module Laser in Cycles.Keys.ToList())
                 {
                     Cycles[Laser] = 0;
                     CyclePos[Laser] = 0;
                 }
-                LavishScriptAPI.LavishScript.ExecuteCommand("relay \"all other\" -noredirect MiningTeamUpdateRoidList " + CurRoid.ID.ToString());
+                LavishScriptAPI.LavishScript.ExecuteCommand("relay \"all other\" -noredirect MiningTeamUpdateRoidList " + Me.CharID + " " + CurRoid.ID.ToString());
 
                 Rescan = false;
             }
@@ -384,4 +378,23 @@ namespace MinerBot
             return false;
         }
     }
+
+    static class DictionaryHelper
+    {
+        public static IDictionary<TKey, TValue> AddOrUpdate<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, TValue value)
+        {
+            if (dictionary.ContainsKey(key))
+            {
+                dictionary[key] = value;
+            }
+            else
+            {
+                dictionary.Add(key, value);
+            }
+
+            return dictionary;
+        }
+    }
 }
+
+
