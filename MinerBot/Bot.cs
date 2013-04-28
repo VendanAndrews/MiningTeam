@@ -58,8 +58,9 @@ namespace MinerBot
             {
                 if (args.Length >= 2)
                 {
-                    foreach (string s in args.Skip(2))
+                    foreach (string s in args.Skip(1))
                     {
+                        EVEFrame.Log("Adding roid " + s + " to used list");
                         UsedRoidList.Add(long.Parse(s));
                     }
                 }
