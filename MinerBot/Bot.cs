@@ -9,9 +9,52 @@ using InnerSpaceAPI;
 
 namespace MinerBot
 {
+    #region Enums
+
+    public enum DropoffType
+    {
+        ItemHangar,
+        CorpHangar,
+        Jetcan
+    }
+
+    #endregion
+
+    #region Settings
+
+    class MinerSettings : Settings
+    {
+        public DropoffType DropoffType = DropoffType.ItemHangar;
+        public String Dropoff = "";
+    }
+
+    #endregion
+
     class Bot : State
     {
-        
+        #region Instantiation
+
+        static Bot _Instance;
+        public static Bot Instance
+        {
+            get
+            {
+                if (_Instance == null)
+                {
+                    _Instance = new Bot();
+                }
+                return _Instance;
+            }
+        }
+
+        private Bot() : base()
+        {
+
+        }
+
+        #endregion        
+
+        #region Variables
 
         public Queue<Entity> Belts = new Queue<Entity>();
         public Entity CurBelt = null;
@@ -23,21 +66,19 @@ namespace MinerBot
         Dictionary<Module, int> Cycles = null;
         Dictionary<Module, double> CyclePos = null;
         Dictionary<Module, Entity> CycleTarget = null;
-        Dictionary<long, long> UsedRoidList = new Dictionary<long,long>();
+        Dictionary<long, long> UsedRoidList = new Dictionary<long, long>();
 
         bool Rescan = false;
 
         public DroneDefense drones = new DroneDefense();
         public JetcanDeploy jetcans = new JetcanDeploy();
 
-        public DropoffType Dropoff = DropoffType.ItemHangar;
+        public Logger Console = new Logger();
+        public MinerSettings Config = new MinerSettings();
 
-        public enum DropoffType
-        {
-            ItemHangar,
-            CorpHangar,
-            Jetcan
-        }
+        #endregion
+
+        #region Actions
 
         public bool TemporaryIsPrimedCheck(InventoryContainer Cont)
         {
@@ -56,7 +97,7 @@ namespace MinerBot
         {
             try
             {
-                EVEFrame.Log("Adding roid " + args[2] + " to used list for miner " + args[1]);
+                Console.Log("Adding roid " + args[2] + " to used list for miner " + args[1]);
                 UsedRoidList.AddOrUpdate(long.Parse(args[1]), long.Parse(args[2]));
             }
             catch { }
@@ -69,6 +110,10 @@ namespace MinerBot
             LavishScriptAPI.LavishScript.Commands.AddCommand("MiningTeamUpdateRoidList", UsedRoidListUpdate);
         }
 
+        #endregion
+
+        #region States
+
         public bool InStation(object[] Params)
         {
             if (Session.InSpace)
@@ -78,19 +123,19 @@ namespace MinerBot
             }
             if (MyShip.OreHold == null)
             {
-                EVEFrame.Log("Opening Inventory");
+                Console.Log("Opening Inventory");
                 Command.OpenInventory.Execute();
                 return false;
             }
             if (!TemporaryIsPrimedCheck(MyShip.OreHold))
             {
-                EVEFrame.Log("Making OreHold Active");
+                Console.Log("Making OreHold Active");
                 MyShip.OreHold.MakeActive();
                 return false;
             }
             if (MyShip.OreHold.Items.Count(item => item.CategoryID == Category.Asteroid) > 0)
             {
-                EVEFrame.Log("Transfering Ore");
+                Console.Log("Transfering Ore");
                 MyShip.OreHold.Items.Where(item => item.CategoryID == Category.Asteroid).MoveTo(Station.ItemHangar);
                 return false;
             }
@@ -112,8 +157,8 @@ namespace MinerBot
                     Station.ItemHangar.StackAll();
                     return false;
                 }
-                
-                EVEFrame.Log("Undocking");
+
+                Console.Log("Undocking");
                 Command.CmdExitStation.Execute();
                 WaitFor(30, () => Session.InSpace);
                 QueueState(Unloaded);
@@ -147,11 +192,11 @@ namespace MinerBot
                 return true;
             }
 
-            if (Dropoff == DropoffType.Jetcan && jetcans.Idle)
+            if (Config.DropoffType == DropoffType.Jetcan && jetcans.Idle)
             {
                 jetcans.QueueState(jetcans.JetCan);
             }
-            if (Dropoff != DropoffType.Jetcan && !jetcans.Idle)
+            if (Config.DropoffType != DropoffType.Jetcan && !jetcans.Idle)
             {
                 jetcans.Clear();
             }
@@ -163,19 +208,19 @@ namespace MinerBot
 
             if (MyShip.OreHold == null)
             {
-                EVEFrame.Log("Opening Inventory");
+                Console.Log("Opening Inventory");
                 Command.OpenInventory.Execute();
                 return false;
             }
             if (!TemporaryIsPrimedCheck(MyShip.OreHold))
             {
-                EVEFrame.Log("Making OreHold Active");
+                Console.Log("Making OreHold Active");
                 MyShip.OreHold.MakeActive();
                 return false;
             }
             if (MyShip.OreHold.UsedCapacity > MyShip.OreHold.MaxCapacity * 0.95)
             {
-                EVEFrame.Log("Preparing to Unload");
+                Console.Log("Preparing to Unload");
                 QueueState(PrepareUnload);
                 return true;
             }
@@ -208,14 +253,14 @@ namespace MinerBot
                 {
                     return false;
                 }
-                EVEFrame.Log("Approaching " + CurRoid.Name);
+                Console.Log("Approaching " + CurRoid.Name);
                 CurRoid.Approach((int)(MyShip.Modules.Where(MiningLasers).Min(mod => mod.OptimalRange) * 0.75));
                 return false;
             }
 
             if (!CurRoid.LockedTarget && !CurRoid.LockingTarget)
             {
-                EVEFrame.Log("Locking " + CurRoid.Name);
+                Console.Log("Locking " + CurRoid.Name);
                 CurRoid.LockTarget();
                 return false;
             }
@@ -243,7 +288,7 @@ namespace MinerBot
             {
                 if ((!SurveyScan.Scan.ContainsKey(CurRoid) || Rescan) && !MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).IsActive)
                 {
-                    EVEFrame.Log("Activating Scanner");
+                    Console.Log("Activating Scanner");
                     MyShip.Modules.First(mod => mod.GroupID == Group.SurveyScanner).Activate();
                     Rescan = false;
                     return false;
@@ -254,7 +299,7 @@ namespace MinerBot
 
                     if (EstimatedMined > (SurveyScan.Scan[CurRoid] * CurRoid.Volume + 5))
                     {
-                        EVEFrame.Log("ShortCycling Lasers");
+                        Console.Log("ShortCycling Lasers");
                         Rescan = true;
                         foreach (Module laser in MyShip.Modules.Where(MiningLasers))
                         {
@@ -276,12 +321,12 @@ namespace MinerBot
 
             if (MyShip.Modules.Where(MiningLasers).Count(mod => !mod.IsActive) > 0 && CurRoid.LockedTarget)
             {
-                EVEFrame.Log("Mining " + CurRoid.Name);
+                Console.Log("Mining " + CurRoid.Name);
                 MyShip.Modules.Where(MiningLasers).First(mod => !mod.IsActive).Activate(CurRoid);
                 return false;
             }
 
-            foreach(Module laser in MyShip.Modules.Where(MiningLasers).Where(mod => mod.IsActive && !CurRoid.ActiveModules.Contains(mod)))
+            foreach (Module laser in MyShip.Modules.Where(MiningLasers).Where(mod => mod.IsActive && !CurRoid.ActiveModules.Contains(mod)))
             {
                 laser.Deactivate();
                 CyclePos[laser] = 0;
@@ -293,7 +338,7 @@ namespace MinerBot
 
         public bool PrepareUnload(object[] Params)
         {
-            switch (Dropoff)
+            switch (Config.DropoffType)
             {
                 case DropoffType.ItemHangar:
                     QueueState(PrepareToWarp);
@@ -318,7 +363,7 @@ namespace MinerBot
             }
             if (!drones.Idle)
             {
-                EVEFrame.Log("drones is not idle.");
+                Console.Log("drones is not idle.");
             }
             return drones.Idle;
         }
@@ -337,7 +382,7 @@ namespace MinerBot
                     Belts = new Queue<Entity>(Entity.All.Where(ent => ent.GroupID == Group.AsteroidBelt && ent.Type != "Ice Field"));
                     if (Belts.Count == 0)
                     {
-                        EVEFrame.Log("Error, no belts found");
+                        Console.Log("Error, no belts found");
                         return true;
                     }
                 }
@@ -346,7 +391,7 @@ namespace MinerBot
             }
             if (MyShip.ToEntity.Mode != EntityMode.Warping && CurBelt.Distance > 100000)
             {
-                EVEFrame.Log("Warping To " + CurBelt.Name + " | " + CurBelt.Type);
+                Console.Log("Warping To " + CurBelt.Name + " | " + CurBelt.Type);
                 CurBelt.WarpTo();
                 WaitFor(10, () => false, () => MyShip.ToEntity.Mode == EntityMode.Warping);
                 QueueState(HeadingToBelt);
@@ -372,7 +417,7 @@ namespace MinerBot
                 Entity station = Entity.All.FirstOrDefault(ent => ent.GroupID == Group.Station && ent.Name == Properties.Settings.Default.Station);
                 if (station != null && station.Exists)
                 {
-                    EVEFrame.Log("Docking At " + station.Name);
+                    Console.Log("Docking At " + station.Name);
                     station.Dock();
                     NextPulse = DateTime.Now.AddSeconds(10);
                     return false;
@@ -380,7 +425,12 @@ namespace MinerBot
             }
             return false;
         }
+
+        #endregion
+
     }
+
+    #region Utility classes
 
     static class DictionaryHelper
     {
@@ -398,6 +448,9 @@ namespace MinerBot
             return dictionary;
         }
     }
+
+    #endregion
+
 }
 
 

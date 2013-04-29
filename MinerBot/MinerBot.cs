@@ -14,26 +14,25 @@ namespace MinerBot
 {
     public partial class MinerBot : Form
     {
+        Bot bot = Bot.Instance;
+        UIUpdate uiupdate = UIUpdate.Instance;
+        MinerSettings Config = Bot.Instance.Config;
+
         public MinerBot()
         {
             InitializeComponent();
+            Bot.Instance.Console.Event += Console;
         }
 
-        Bot bot;
-        
         private void Form1_Load(object sender, EventArgs e)
         {
-            using (new EVEFrameLock())
-            {
-            }
-            bot = new Bot();
             bot.RegisterCommands();
-            txtStation.Text = Properties.Settings.Default.Station;
+            Dropoff.Text = Properties.Settings.Default.Station;
         }
 
         private void txtStation_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Station = txtStation.Text;
+            Properties.Settings.Default.Station = Dropoff.Text;
             Properties.Settings.Default.Save();
         }
 
@@ -53,43 +52,15 @@ namespace MinerBot
         {
             using(new EVEFrameLock())
             {
-                txtStation.Text = Session.StationName;
-                Properties.Settings.Default.Station = txtStation.Text;
+                Dropoff.Text = Session.StationName;
+                Properties.Settings.Default.Station = Dropoff.Text;
                 Properties.Settings.Default.Save();
             }
         }
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (bot != null)
-            {
-                if (bot.CurState != null)
-                {
-                    lblState.Text = "State: " + bot.CurState.ToString();
-                }
-                else
-                {
-                    lblState.Text = "State: Idle";
-                }
-                if (bot.drones.CurState != null)
-                {
-                    lblDroneState.Text = "Drones: " + bot.drones.CurState.ToString();
-                }
-                else
-                {
-                    lblDroneState.Text = "Drones: Idle";
-                }
-                if (bot.jetcans.CurState != null)
-                {
-                    lblJetcanState.Text = "Jetcans: " + bot.jetcans.CurState.ToString();
-                }
-                else
-                {
-                    lblJetcanState.Text = "Jetcans: Idle";
-                }
-                lblCurRoidOre.Text = "CurRoid Ore: " + bot.CurRoidOre.ToString("F2") + " m^3";
-                lblEstimatedMined.Text = "EstimatedMined: " + bot.EstimatedMined.ToString("F2") + " m^3";
-            }
+            Dropoff.AutoCompleteCustomSource = new MyAutoCompleteStringCollection(uiupdate.Bookmarks); 
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -99,14 +70,37 @@ namespace MinerBot
                 switch (comboBox1.SelectedItem.ToString())
                 {
                     case "ItemHangar":
-                        bot.Dropoff = Bot.DropoffType.ItemHangar;
+                        Config.DropoffType = DropoffType.ItemHangar;
                         break;
                     case "Jetcan":
-                        bot.Dropoff = Bot.DropoffType.Jetcan;
+                        Config.DropoffType = DropoffType.Jetcan;
                         break;
 
                 }
             }
+        }
+
+        delegate void SetConsole(string Message);
+
+        void Console(string Message)
+        {
+            if (listConsole.InvokeRequired)
+            {
+                listConsole.BeginInvoke(new SetConsole(Console), Message);
+            }
+            else
+            {
+                listConsole.Items.Add(Message);
+            }
+        }
+
+    }
+
+    public class MyAutoCompleteStringCollection : AutoCompleteStringCollection
+    {
+        public MyAutoCompleteStringCollection(List<String> items)
+        {
+            this.AddRange(items.ToArray());
         }
     }
 }

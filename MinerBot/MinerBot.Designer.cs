@@ -29,49 +29,37 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            this.lblState = new System.Windows.Forms.Label();
-            this.txtStation = new System.Windows.Forms.TextBox();
-            this.lblStation = new System.Windows.Forms.Label();
+            this.Dropoff = new System.Windows.Forms.TextBox();
             this.chkActive = new System.Windows.Forms.CheckBox();
-            this.btnCurrentStation = new System.Windows.Forms.Button();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.lblCurRoidOre = new System.Windows.Forms.Label();
-            this.lblEstimatedMined = new System.Windows.Forms.Label();
-            this.lblDroneState = new System.Windows.Forms.Label();
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.lblJetcanState = new System.Windows.Forms.Label();
+            this.tabControl1 = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.listConsole = new System.Windows.Forms.ListBox();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.tabControl1.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
-            // lblState
+            // Dropoff
             // 
-            this.lblState.AutoSize = true;
-            this.lblState.Location = new System.Drawing.Point(12, 9);
-            this.lblState.Name = "lblState";
-            this.lblState.Size = new System.Drawing.Size(38, 13);
-            this.lblState.TabIndex = 0;
-            this.lblState.Text = "State: ";
-            // 
-            // txtStation
-            // 
-            this.txtStation.Location = new System.Drawing.Point(58, 59);
-            this.txtStation.Name = "txtStation";
-            this.txtStation.Size = new System.Drawing.Size(100, 20);
-            this.txtStation.TabIndex = 1;
-            this.txtStation.TextChanged += new System.EventHandler(this.txtStation_TextChanged);
-            // 
-            // lblStation
-            // 
-            this.lblStation.AutoSize = true;
-            this.lblStation.Location = new System.Drawing.Point(12, 62);
-            this.lblStation.Name = "lblStation";
-            this.lblStation.Size = new System.Drawing.Size(40, 13);
-            this.lblStation.TabIndex = 2;
-            this.lblStation.Text = "Station";
+            this.Dropoff.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.Dropoff.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.CustomSource;
+            this.Dropoff.Location = new System.Drawing.Point(6, 19);
+            this.Dropoff.Name = "Dropoff";
+            this.Dropoff.Size = new System.Drawing.Size(291, 20);
+            this.Dropoff.TabIndex = 1;
+            this.Dropoff.TextChanged += new System.EventHandler(this.txtStation_TextChanged);
             // 
             // chkActive
             // 
             this.chkActive.AutoSize = true;
-            this.chkActive.Location = new System.Drawing.Point(15, 85);
+            this.chkActive.Location = new System.Drawing.Point(12, 12);
             this.chkActive.Name = "chkActive";
             this.chkActive.Size = new System.Drawing.Size(56, 17);
             this.chkActive.TabIndex = 3;
@@ -79,47 +67,10 @@
             this.chkActive.UseVisualStyleBackColor = true;
             this.chkActive.CheckedChanged += new System.EventHandler(this.chkActive_CheckedChanged);
             // 
-            // btnCurrentStation
-            // 
-            this.btnCurrentStation.Location = new System.Drawing.Point(164, 57);
-            this.btnCurrentStation.Name = "btnCurrentStation";
-            this.btnCurrentStation.Size = new System.Drawing.Size(90, 23);
-            this.btnCurrentStation.TabIndex = 4;
-            this.btnCurrentStation.Text = "Current Station";
-            this.btnCurrentStation.UseVisualStyleBackColor = true;
-            this.btnCurrentStation.Click += new System.EventHandler(this.btnCurrentStation_Click);
-            // 
             // timer1
             // 
             this.timer1.Enabled = true;
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
-            // 
-            // lblCurRoidOre
-            // 
-            this.lblCurRoidOre.AutoSize = true;
-            this.lblCurRoidOre.Location = new System.Drawing.Point(12, 149);
-            this.lblCurRoidOre.Name = "lblCurRoidOre";
-            this.lblCurRoidOre.Size = new System.Drawing.Size(71, 13);
-            this.lblCurRoidOre.TabIndex = 5;
-            this.lblCurRoidOre.Text = "CurRoid Ore: ";
-            // 
-            // lblEstimatedMined
-            // 
-            this.lblEstimatedMined.AutoSize = true;
-            this.lblEstimatedMined.Location = new System.Drawing.Point(12, 173);
-            this.lblEstimatedMined.Name = "lblEstimatedMined";
-            this.lblEstimatedMined.Size = new System.Drawing.Size(91, 13);
-            this.lblEstimatedMined.TabIndex = 6;
-            this.lblEstimatedMined.Text = "Estimated Mined: ";
-            // 
-            // lblDroneState
-            // 
-            this.lblDroneState.AutoSize = true;
-            this.lblDroneState.Location = new System.Drawing.Point(12, 31);
-            this.lblDroneState.Name = "lblDroneState";
-            this.lblDroneState.Size = new System.Drawing.Size(47, 13);
-            this.lblDroneState.TabIndex = 7;
-            this.lblDroneState.Text = "Drones: ";
             // 
             // comboBox1
             // 
@@ -127,39 +78,92 @@
             this.comboBox1.Items.AddRange(new object[] {
             "ItemHangar",
             "Jetcan"});
-            this.comboBox1.Location = new System.Drawing.Point(143, 112);
+            this.comboBox1.Location = new System.Drawing.Point(6, 19);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.Size = new System.Drawing.Size(291, 21);
             this.comboBox1.TabIndex = 8;
             this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
-            // lblJetcanState
+            // tabControl1
             // 
-            this.lblJetcanState.AutoSize = true;
-            this.lblJetcanState.Location = new System.Drawing.Point(140, 9);
-            this.lblJetcanState.Name = "lblJetcanState";
-            this.lblJetcanState.Size = new System.Drawing.Size(64, 13);
-            this.lblJetcanState.TabIndex = 9;
-            this.lblJetcanState.Text = "JetcanState";
+            this.tabControl1.Controls.Add(this.tabPage1);
+            this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Location = new System.Drawing.Point(12, 35);
+            this.tabControl1.Name = "tabControl1";
+            this.tabControl1.SelectedIndex = 0;
+            this.tabControl1.Size = new System.Drawing.Size(324, 334);
+            this.tabControl1.TabIndex = 10;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.listConsole);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(316, 308);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "Console";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // listConsole
+            // 
+            this.listConsole.BackColor = System.Drawing.Color.Black;
+            this.listConsole.Font = new System.Drawing.Font("Calibri", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.listConsole.ForeColor = System.Drawing.Color.White;
+            this.listConsole.FormattingEnabled = true;
+            this.listConsole.Location = new System.Drawing.Point(6, 6);
+            this.listConsole.Name = "listConsole";
+            this.listConsole.Size = new System.Drawing.Size(303, 290);
+            this.listConsole.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.groupBox2);
+            this.tabPage2.Controls.Add(this.groupBox1);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(316, 308);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "Dropoff";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.Dropoff);
+            this.groupBox1.Location = new System.Drawing.Point(7, 13);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(303, 44);
+            this.groupBox1.TabIndex = 9;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "Dropoff Bookmark";
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.Controls.Add(this.comboBox1);
+            this.groupBox2.Location = new System.Drawing.Point(7, 68);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(303, 45);
+            this.groupBox2.TabIndex = 10;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Dropoff Type";
             // 
             // MinerBot
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(288, 206);
-            this.Controls.Add(this.lblJetcanState);
-            this.Controls.Add(this.comboBox1);
-            this.Controls.Add(this.lblDroneState);
-            this.Controls.Add(this.lblEstimatedMined);
-            this.Controls.Add(this.lblCurRoidOre);
-            this.Controls.Add(this.btnCurrentStation);
+            this.ClientSize = new System.Drawing.Size(346, 381);
+            this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.chkActive);
-            this.Controls.Add(this.lblStation);
-            this.Controls.Add(this.txtStation);
-            this.Controls.Add(this.lblState);
             this.Name = "MinerBot";
             this.Text = "MinerBot";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.tabControl1.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            this.groupBox2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -167,17 +171,16 @@
 
         #endregion
 
-        private System.Windows.Forms.Label lblState;
-        private System.Windows.Forms.TextBox txtStation;
-        private System.Windows.Forms.Label lblStation;
+        private System.Windows.Forms.TextBox Dropoff;
         private System.Windows.Forms.CheckBox chkActive;
-        private System.Windows.Forms.Button btnCurrentStation;
         private System.Windows.Forms.Timer timer1;
-        private System.Windows.Forms.Label lblCurRoidOre;
-        private System.Windows.Forms.Label lblEstimatedMined;
-        private System.Windows.Forms.Label lblDroneState;
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.Label lblJetcanState;
+        private System.Windows.Forms.TabControl tabControl1;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.ListBox listConsole;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBox2;
 
     }
 }
