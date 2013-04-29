@@ -365,17 +365,13 @@ namespace MinerBot
 
         public bool PrepareToWarp(object[] Params)
         {
-            if (drones.InCombat && !drones.Idle)
+            if (!drones.Idle)
             {
                 drones.Deactivate();
             }
             if (!jetcans.Idle)
             {
                 jetcans.Clear();
-            }
-            if (!drones.Idle)
-            {
-                Console.Log("drones is not idle.");
             }
             return drones.Idle;
         }
