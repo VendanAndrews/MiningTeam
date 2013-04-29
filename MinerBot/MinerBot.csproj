@@ -36,6 +36,10 @@
   <ItemGroup>
     <Reference Include="EveCom">
       <HintPath>..\..\Ratter\Ratter\EveCom.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Lavish.InnerSpace">
+      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\InnerSpace\.NET Programs\Lavish.InnerSpace.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
