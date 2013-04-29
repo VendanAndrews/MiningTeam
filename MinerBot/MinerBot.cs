@@ -33,8 +33,8 @@ namespace MinerBot
 
         private void txtStation_TextChanged(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Station = Dropoff.Text;
-            Properties.Settings.Default.Save();
+            Config.Dropoff = Dropoff.Text;
+            Config.Save();
         }
 
         private void chkActive_CheckedChanged(object sender, EventArgs e)
@@ -78,6 +78,7 @@ namespace MinerBot
                         break;
 
                 }
+                Config.Save();
             }
         }
 
