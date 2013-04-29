@@ -417,10 +417,23 @@ namespace MinerBot
 
         public bool DockAtStation(object[] Params)
         {
-            Move.Bookmark(Bookmark.All.FirstOrDefault(a => a.Title == Config.Dropoff));
-            QueueState(Traveling);
-            QueueState(InStation);
-            return true;
+            if (Session.InStation)
+            {
+                QueueState(InStation);
+                return true;
+            }
+            if (MyShip.ToEntity.Mode != EntityMode.Warping)
+            {
+                Bookmark bookmark = Bookmark.All.FirstOrDefault(a => a.Title == Config.Dropoff);
+                if (bookmark != null && bookmark.GroupID == Group.Station)
+                {
+                    Console.Log("Docking At " + Entity.All.FirstOrDefault(a => a.ID == bookmark.ItemID).Name);
+                    Entity.All.FirstOrDefault(a => a.ID == bookmark.ItemID).Dock();
+                    NextPulse = DateTime.Now.AddSeconds(10);
+                    return false;
+                }
+            }
+            return false;
         }
 
         #endregion
