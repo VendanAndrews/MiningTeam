@@ -84,6 +84,7 @@ namespace MinerBot
         {
             if (!InCombat)
             {
+                ClearCurState();
                 Clear();
             }
         }

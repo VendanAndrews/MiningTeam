@@ -60,7 +60,7 @@ namespace MinerBot
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Dropoff.AutoCompleteCustomSource = new MyAutoCompleteStringCollection(uiupdate.Bookmarks); 
+            
         }
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
@@ -92,6 +92,11 @@ namespace MinerBot
             {
                 listConsole.Items.Add(Message);
             }
+        }
+
+        private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            Dropoff.AutoCompleteCustomSource = new MyAutoCompleteStringCollection(uiupdate.Bookmarks); 
         }
 
     }
