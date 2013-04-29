@@ -424,7 +424,9 @@ namespace MinerBot
             }
             if (MyShip.ToEntity.Mode != EntityMode.Warping)
             {
+                Console.Log("Dropoff: " + Config.Dropoff);
                 Bookmark bookmark = Bookmark.All.FirstOrDefault(a => a.Title == Config.Dropoff);
+                Console.Log("Bookmark found: " + bookmark.Title + " Group = " + bookmark.GroupID);
                 if (bookmark != null && bookmark.GroupID == Group.Station)
                 {
                     Console.Log("Docking At " + Entity.All.FirstOrDefault(a => a.ID == bookmark.ItemID).Name);
