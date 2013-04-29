@@ -369,12 +369,13 @@ namespace MinerBot
             if (!drones.Idle)
             {
                 drones.Deactivate();
+                return false;
             }
             if (!jetcans.Idle)
             {
                 jetcans.Clear();
             }
-            return drones.Idle;
+            return true;
         }
 
         public bool HeadingToBelt(object[] Params)
