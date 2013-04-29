@@ -22,6 +22,7 @@ namespace MinerBot
         {
             InitializeComponent();
             Bot.Instance.Console.Event += Console;
+            Bot.Instance.Move.Log.Event += Console;
         }
 
         private void Form1_Load(object sender, EventArgs e)
