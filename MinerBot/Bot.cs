@@ -365,6 +365,7 @@ namespace MinerBot
 
         public bool PrepareToWarp(object[] Params)
         {
+            Console.Log("drones.Idle: " + drones.Idle.ToString());
             if (!drones.Idle)
             {
                 drones.Deactivate();

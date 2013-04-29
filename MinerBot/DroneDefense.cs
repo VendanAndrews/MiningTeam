@@ -82,6 +82,7 @@ namespace MinerBot
 
         public void Deactivate()
         {
+            Bot.Instance.Console.Log("Deactivating.  InCombat: " + InCombat.ToString());
             if (!InCombat)
             {
                 Clear();
