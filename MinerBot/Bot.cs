@@ -5,6 +5,7 @@ using System.Text;
 using EveCom;
 using EveComFramework.Core;
 using EveComFramework.Move;
+using EveComFramework.Cargo;
 using InnerSpaceAPI;
 
 namespace MinerBot
@@ -75,6 +76,8 @@ namespace MinerBot
 
         public Logger Console = new Logger();
         public MinerSettings Config = new MinerSettings();
+        public Move Move = Move.Instance;
+        public Cargo Cargo = Cargo.Instance;
 
         #endregion
 
@@ -113,6 +116,15 @@ namespace MinerBot
         #endregion
 
         #region States
+
+        public bool Traveling(object[] Params)
+        {
+            if (!Move.Idle || !Cargo.Idle || (Session.InSpace && MyShip.ToEntity.Mode == EntityMode.Warping))
+            {
+                return false;
+            }
+            return true;
+        }
 
         public bool InStation(object[] Params)
         {

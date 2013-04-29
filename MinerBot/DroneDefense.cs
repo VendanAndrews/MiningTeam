@@ -82,6 +82,7 @@ namespace MinerBot
 
         public void Deactivate()
         {
+            EVEFrame.Log("Attempting to deactivate drones.  InCombat: " + InCombat.ToString());
             if (!InCombat)
             {
                 ClearCurState();
